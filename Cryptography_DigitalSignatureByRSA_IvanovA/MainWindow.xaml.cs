@@ -51,7 +51,7 @@ namespace DigitalSignatureByRSAIvanovAG
             do
             {
                 random.NextBytes(bytes);
-                bytes[bytes.Length - 1] &= (byte)0x7F; //force sign bit to positive
+                bytes[bytes.Length - 1] &= (byte)0x7F; 
                 R = new BigInteger(bytes);
             } while (R >= N);
             return R;
@@ -153,7 +153,6 @@ namespace DigitalSignatureByRSAIvanovAG
             {
                 randomValue = rnd.Next(0, (int)limit);
                 temp = BigInteger.Pow(BigInteger.Parse("2"), (int)randomValue) + 1;
-                //MessageBox.Show(temp.ToString() + "||" + fi_n.ToString());
             }
             while (IsCoprimeTest(temp, fi_n) == false);
             return temp;
