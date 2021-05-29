@@ -28,12 +28,10 @@ namespace DigitalSignatureByRSAIvanovAG
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            //TextBoxInputP.Text = AtkinSieve(BigInteger.Parse(TextBoxIntervalA.Text), BigInteger.Parse(TextBoxIntervalB.Text));
             TextBoxInputP.Text = GenerateBigInt(BigInteger.Parse(TextBoxIntervalB.Text), Convert.ToInt32(TextBoxIntervalA.Text)).ToString();
         }
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            //TextBoxInputQ.Text = AtkinSieve(BigInteger.Parse(TextBoxIntervalA.Text), BigInteger.Parse(TextBoxIntervalB.Text));
             TextBoxInputQ.Text = GenerateBigInt(BigInteger.Parse(TextBoxIntervalB.Text), Convert.ToInt32(TextBoxIntervalA.Text)).ToString();
         }
         private BigInteger GenerateBigInt(BigInteger Upper, int acc)
@@ -56,144 +54,52 @@ namespace DigitalSignatureByRSAIvanovAG
                 bytes[bytes.Length - 1] &= (byte)0x7F; //force sign bit to positive
                 R = new BigInteger(bytes);
             } while (R >= N);
-
             return R;
         }
 
         private bool MillerRabinTest(BigInteger n, int k)
         {
-            // если n == 2 или n == 3 - эти числа простые, возвращаем true
             if (n == 2 || n == 3)
                 return true;
-
-            // если n < 2 или n четное - возвращаем false
             if (n < 2 || n % 2 == 0)
                 return false;
-
-            // представим n − 1 в виде (2^s)·t, где t нечётно, это можно сделать последовательным делением n - 1 на 2
             BigInteger t = n - 1;
-
             int s = 0;
-
             while (t % 2 == 0)
             {
                 t /= 2;
                 s += 1;
             }
 
-            // повторить k раз
             for (int i = 0; i < k; i++)
             {
-                // выберем случайное целое число a в отрезке [2, n − 2]
                 RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-
                 byte[] _a = new byte[n.ToByteArray().LongLength];
-
                 BigInteger a;
-
                 do
                 {
                     rng.GetBytes(_a);
                     a = new BigInteger(_a);
                 }
                 while (a < 2 || a >= n - 2);
-
-                // x ← a^t mod n, вычислим с помощью возведения в степень по модулю
                 BigInteger x = BigInteger.ModPow(a, t, n);
-
-                // если x == 1 или x == n − 1, то перейти на следующую итерацию цикла
                 if (x == 1 || x == n - 1)
                     continue;
 
-                // повторить s − 1 раз
                 for (int r = 1; r < s; r++)
                 {
-                    // x ← x^2 mod n
                     x = BigInteger.ModPow(x, 2, n);
-
-                    // если x == 1, то вернуть "составное"
                     if (x == 1)
                         return false;
-
-                    // если x == n − 1, то перейти на следующую итерацию внешнего цикла
                     if (x == n - 1)
                         break;
                 }
-
                 if (x != n - 1)
                     return false;
             }
-
-            // вернуть "вероятно простое"
             return true;
         }
-        private string AtkinSieve(BigInteger limitA, BigInteger limitB)
-        {
-            string result = "";
-            BigInteger sqr_lim = Sqrt(limitB);
-            BigInteger x2 = 0;
-            BigInteger y2, n;
-            int i, j;
-            BigInteger count = 0;
-            BigInteger size = limitB + (BigInteger)(1);
-            bool[] is_prime = new bool[(int)size];
-            for (i=0; i< limitB; i++)
-            {
-                is_prime[i] = false;
-            }
-            is_prime[2] = true;
-            is_prime[3] = true;
-            for (i=1; i < sqr_lim; ++i)
-            {
-                x2 += 2 * i - 1;
-                y2 = 0;
-                for (j = 1; j < sqr_lim; ++j)
-                {
-                    y2 += 2 * j - 1;
-                    n = 4 * x2 + y2;
-                    if ((n <= limitB) && (n % 12 == 1 || n % 12 == 5))
-                        is_prime[(int)n] = !is_prime[(int)n];
 
-                    n -= x2;
-                    if ((n <= limitB) && (n % 12 == 7))
-                        is_prime[(int)n] = !is_prime[(int)n];
-
-                    n -= 2 * y2;
-                    if ((i > j) && (n <= limitB && (n % 12 == 11)))
-                        is_prime[(int)n] = !is_prime[(int)n];
-                }
-            }
-            for (i = 5; i <= sqr_lim; ++i)
-            {
-                if (is_prime[i])
-                {
-                    n = i * i;
-                    for (j = (int)n; j <= limitB; j += (int)n)
-                        is_prime[j] = false;
-                }
-            }
-            for(i = (int)limitA; i <= limitB; ++i)
-            {
-                if ((is_prime[i] && (i % 3 != 0) && (i % 5 != 0))) count++;
-            }
-            int temp = 0;
-            Random rnd = new Random();
-            int randomValue = rnd.Next(0, (int)count);
-            for (i = (int)limitA; i <= limitB; ++i)
-            {
-                if ((is_prime[i] && (i % 3 != 0) && (i % 5 != 0)))
-                {
-                    if(temp == randomValue)
-                    {
-                        result = i.ToString();
-                        goto exit;
-                    }
-                        temp++;
-                }
-            }
-            exit:
-            return result;
-        }
         public static BigInteger Sqrt(BigInteger n)
         {
             BigInteger result = 0;
@@ -253,25 +159,6 @@ namespace DigitalSignatureByRSAIvanovAG
             return temp;
         }
 
-        /*private bool IsCoprime(BigInteger num1, BigInteger num2)
-        {
-            if (num1 == num2)
-            {
-                return num1 == 1;
-            }
-            else
-            {
-                if (num1 > num2)
-                {
-                    return IsCoprime(num1 - num2, num2);
-                }
-                else
-                {
-                    return IsCoprime(num2 - num1, num1);
-                }
-            }
-        }
-        */
         private bool IsCoprimeTest(BigInteger num1, BigInteger num2)
         {
             BigInteger temp = 0;
@@ -285,9 +172,7 @@ namespace DigitalSignatureByRSAIvanovAG
                     num1 = num2;
                     num2 = temp;
                 }
-                //MessageBox.Show(num1.ToString() + "||" + num2.ToString());
                 num1 = num1 % num2;
-                //MessageBox.Show(num1.ToString());
                 if (num1 == 1) { q = 1; res = true; };
                 if (num1 == 0) { q = 1; res = false; };
             }
@@ -344,26 +229,10 @@ namespace DigitalSignatureByRSAIvanovAG
                     input += input_b[j];
                 }
             }
-            /*
-            string input1a = h.Substring(0, 2);
-            byte[] input1b = Encoding.ASCII.GetBytes(input1a);
-            int input1 = 0;
-            for (int i=0; i<2; i++)
-            {
-                input1 += input1b[i];
-            }
-            */
-            //TextBoxInputQ.Text = input1.ToString();
-            //TextBoxForOtladka.Text = input1.ToString();
             MessageBox.Show(input.ToString());
             BigInteger d = BigInteger.Parse(TextBoxInputD.Text);
             BigInteger n = BigInteger.Parse(TextBoxInputN2.Text);
-            //MessageBox.Show((Math.Pow(Convert.ToInt32(TextBoxForOtladka.Text), d)).ToString());
-            //MessageBox.Show((((int)(Math.Pow(Convert.ToInt32(TextBoxForOtladka.Text),d))).ToString()));
-            //BigInteger s = (BigInteger.Pow(input, d) % n);
             BigInteger s = BigInteger.ModPow(input, d, n);
-            //BigInteger s = (BigInteger.Pow(input1, d) % n);
-            //BigInteger s = (int)(Math.Pow(Convert.ToInt32(TextBoxForOtladka.Text), d) % n);
             TextBoxInputS.Text = s.ToString();
         }
 
@@ -396,21 +265,9 @@ namespace DigitalSignatureByRSAIvanovAG
                     output += output_b[j];
                 }
             }
-            /*
-            string h = GetHash(TextBoxTextToRecieve.Text);
-            string output1a = h.Substring(0, 2);
-            byte[] output1b = Encoding.ASCII.GetBytes(output1a);
-            int output1 = 0;
-            for (int i = 0; i < 2; i++)
-            {
-                output1 += output1b[i];
-            }
-            */
-            //MessageBox.Show(output1.ToString());
             BigInteger s = BigInteger.Parse(TextBoxInputSFromSend.Text);
             BigInteger public_e = BigInteger.Parse(TextBoxOutputE.Text);
             BigInteger n = BigInteger.Parse(TextBoxOutPutN2.Text);
-            //BigInteger h_orig = (BigInteger.Pow(s, public_e) % n);
             BigInteger h_orig = BigInteger.ModPow(s, public_e, n);
             output = output % n;
             MessageBox.Show(output.ToString() + "||" + h_orig.ToString());
