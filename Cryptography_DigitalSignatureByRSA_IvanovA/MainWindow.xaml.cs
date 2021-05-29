@@ -272,11 +272,11 @@ namespace DigitalSignatureByRSAIvanovAG
             MessageBox.Show(output.ToString() + "||" + h_orig.ToString());
             if(output == h_orig)
             {
-                MessageBox.Show("Успех", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Success", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                MessageBox.Show("Ошибка", "Уведомление", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Error", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
